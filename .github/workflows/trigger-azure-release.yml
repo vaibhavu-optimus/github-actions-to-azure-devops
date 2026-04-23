@@ -1,0 +1,21 @@
+name: Trigger Azure DevOps Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trigger Azure Pipeline
+        uses: azure/pipelines@v1
+        with:
+          azure-devops-project-url: https://dev.azure.com/vaibhavuniyal/test-project/
+          azure-pipeline-name: 'pipeline1'
+          azure-devops-token: ${{ secrets.AZURE_DEVOPS_PAT }}
