@@ -1,0 +1,22 @@
+name: CI + Trigger Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger Azure Release
+        uses: ./.github/actions/trigger-azure-release
+        with:
+          organization: ${{ secrets.AZURE_DEVOPS_ORG }}
+          project: ${{ secrets.AZURE_DEVOPS_PROJECT }}
+          release-definition-id: ${{ secrets.RELEASE_DEFINITION_ID }}
+          pat: ${{ secrets.AZURE_DEVOPS_PAT }}
+
+
+          
