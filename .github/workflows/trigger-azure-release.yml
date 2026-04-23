@@ -13,9 +13,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Trigger Azure Pipeline
-        uses: azure/pipelines@v1
-        with:
-          azure-devops-project-url: https://dev.azure.com/vaibhavuniyal/test-project/
-          azure-pipeline-name: 'pipeline1'
-          azure-devops-token: ${{ secrets.AZURE_DEVOPS_PAT }}
+      - name: Trigger Azure DevOps Release
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+          AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
+          AZURE_DEVOPS_PROJECT: ${{ secrets.AZURE_DEVOPS_PROJECT }}
+          RELEASE_DEFINITION_ID: ${{ secrets.RELEASE_DEFINITION_ID }}
+        run: |
+          echo "Triggering Azure DevOps Release..."
+
+          curl -u :$AZURE_DEVOPS_PAT \
+          -H "Content-Type: application/json" \
+          -X POST \
+          https://vsrm.dev.azure.com/$AZURE_DEVOPS_ORG/$AZURE_DEVOPS_PROJECT/_apis/release/releases?api-version=7.0 \
+          -d "{
+            \"definitionId\": $RELEASE_DEFINITION_ID
+          }"
