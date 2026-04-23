@@ -1,0 +1,44 @@
+name: "Trigger Azure DevOps Release"
+description: "Triggers an Azure DevOps release pipeline"
+
+inputs:
+  organization:
+    description: "Azure DevOps organization"
+    required: true
+  project:
+    description: "Azure DevOps project"
+    required: true
+  release-definition-id:
+    description: "Release Definition ID"
+    required: true
+  pat:
+    description: "Azure DevOps Personal Access Token"
+    required: true
+  variables:
+    description: "Optional JSON string for variables"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Trigger Release
+      shell: bash
+      run: |
+        echo "Triggering Azure DevOps Release..."
+
+        if [ -z "${{ inputs.variables }}" ]; then
+          BODY="{\"definitionId\": ${{ inputs.release-definition-id }}}"
+        else
+          BODY="{\"definitionId\": ${{ inputs.release-definition-id }}, \"variables\": ${{ inputs.variables }}}"
+        fi
+
+        curl -s -o response.json -w "%{http_code}" \
+          -u :${{ inputs.pat }} \
+          -H "Content-Type: application/json" \
+          -X POST \
+          https://vsrm.dev.azure.com/${{ inputs.organization }}/${{ inputs.project }}/_apis/release/releases?api-version=7.0 \
+          -d "$BODY"
+
+        echo "Response:"
+        cat response.json
