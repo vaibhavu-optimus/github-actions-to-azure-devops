@@ -1,31 +1,19 @@
-name: Trigger Azure DevOps Release
+name: CI + Trigger Release
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  trigger-release:
+  release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Trigger Azure DevOps Release
-        env:
-          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
-          AZURE_DEVOPS_ORG: ${{ secrets.AZURE_DEVOPS_ORG }}
-          AZURE_DEVOPS_PROJECT: ${{ secrets.AZURE_DEVOPS_PROJECT }}
-          RELEASE_DEFINITION_ID: ${{ secrets.RELEASE_DEFINITION_ID }}
-        run: |
-          echo "Triggering Azure DevOps Release..."
-
-          curl -u :$AZURE_DEVOPS_PAT \
-          -H "Content-Type: application/json" \
-          -X POST \
-          https://vsrm.dev.azure.com/$AZURE_DEVOPS_ORG/$AZURE_DEVOPS_PROJECT/_apis/release/releases?api-version=7.0 \
-          -d "{
-            \"definitionId\": $RELEASE_DEFINITION_ID
-          }"
+      - name: Trigger Azure Release
+        uses: ./.github/actions/trigger-azure-release
+        with:
+          organization: ${{ secrets.AZURE_DEVOPS_ORG }}
+          project: ${{ secrets.AZURE_DEVOPS_PROJECT }}
+          release-definition-id: ${{ secrets.RELEASE_DEFINITION_ID }}
+          pat: ${{ secrets.AZURE_DEVOPS_PAT }}
